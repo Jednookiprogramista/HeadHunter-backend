@@ -4,4 +4,4 @@ export class StudentDto {
   pwd: string;
 }
 
-/** przykładowe dane   **/
+/** przykładowe dane **/
