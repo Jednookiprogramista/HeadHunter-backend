@@ -3,13 +3,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { StudentModule } from "./student/student.module";
-import { AuthModule } from "./auth/auth.module";
+import { StudentModule } from './student/student.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: ['.env'],
+      envFilePath: ['.env.development', '.env'],
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',

@@ -1,28 +1,26 @@
-import {Body, Controller, Get, Post, Res} from "@nestjs/common";
-import { AuthService } from "./auth.service";
-import { AuthDto } from "./dto/auth.dto";
+import { Body, Controller, Get, Post, Res } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { AuthDto } from './dto/auth.dto';
+import { Response } from 'express';
 
-@Controller("/auth")
+@Controller('/auth')
 export class AuthController {
-  constructor(private authService: AuthService) {
-  }
+  constructor(private authService: AuthService) {}
 
-  @Post("/signup")
+  @Post('/signup')
   async signup(@Body() dto: AuthDto) {
     return this.authService.signUp(dto);
   }
 
-  @Post("/signin")
-  async signin(@Body() dto: AuthDto,
-               @Res() res: Response) {
+  @Post('/signin')
+  async signin(@Body() dto: AuthDto, @Res() res: Response) {
     return this.authService.signIn(dto, res);
   }
 
-  @Get("/refresh")
+  @Get('/refresh')
   refresh() {}
   /** na chwilę obecną nie mam na to pomysłu */
 
-  @Get("/logout")
+  @Get('/logout')
   async logOut() {}
-
 }
