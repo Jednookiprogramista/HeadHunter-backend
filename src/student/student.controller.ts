@@ -38,4 +38,9 @@ export class StudentController {
   deleteStudent(@Param('id') id: string) {
     return this.studentService.removeStudent(id);
   }
+
+  @Post('/import')
+  importStudentsCsv(@Body() csvFile: string) {
+    return this.studentService.importStudentsCsv(csvFile);
+  }
 }

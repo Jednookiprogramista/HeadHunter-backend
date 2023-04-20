@@ -15,7 +15,7 @@ export class HR {
   id: string;
 
   @Column({
-    length: 350,
+    length: 190,
   })
   @IsEmail()
   email: string;

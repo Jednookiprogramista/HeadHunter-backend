@@ -11,13 +11,14 @@ import { ExpectedContractType } from '../enums/expected-contract-type';
 import { HR } from '../hr/hr.entity';
 
 @Entity()
-@Unique(['email', 'githubUsername'])
+@Unique(['email'])
+@Unique(['githubUsername'])
 export class Student {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({
-    length: 350,
+    length: 190,
   })
   @IsEmail()
   email: string;
@@ -40,7 +41,7 @@ export class Student {
   lastName: string;
 
   @Column({
-    length: 40,
+    length: 39,
   })
   githubUsername: string;
 
@@ -134,8 +135,8 @@ export class Student {
     default: null,
     nullable: true,
   })
-  @Min(0)
-  @Max(5)
+  // @Min(0)
+  // @Max(5)
   courseCompletion: number;
 
   @Column({
@@ -147,7 +148,7 @@ export class Student {
   })
   @Min(0)
   @Max(5)
-  courseEngagment: number;
+  courseEngagement: number;
 
   @Column({
     type: 'float',
