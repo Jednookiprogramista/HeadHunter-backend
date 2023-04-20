@@ -8,6 +8,8 @@ import {
 } from 'class-validator';
 
 export class StudentDto {
+  id: string;
+
   @IsEmail()
   @MaxLength(190)
   email: string;

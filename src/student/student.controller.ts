@@ -3,40 +3,50 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
-  Patch,
   Post,
+  Put,
 } from '@nestjs/common';
 import { StudentService } from './student.service';
-import { StudentDto } from './dto/student.dto';
+import { Student } from './student.entity';
+import {
+  CreateStudentResponse,
+  GetListOfStudentsResponse,
+  GetOneStudentResponse,
+  UpdateStudentResponse,
+} from '../interfaces/student';
 
 @Controller('student')
 export class StudentController {
-  constructor(private studentService: StudentService) {}
+  constructor(@Inject(StudentService) private studentService: StudentService) {}
 
-  @Post('/create')
-  addStudent(@Body() newStudent: StudentDto) {
+  @Get('/')
+  getListOfStudents(): Promise<GetListOfStudentsResponse> {
+    return this.studentService.getListOfStudents();
+  }
+
+  @Get('/:id')
+  getOneStudent(@Param('id') id: string): Promise<GetOneStudentResponse> {
+    return this.studentService.getOneStudent(id);
+  }
+
+  @Delete('/:id')
+  removeStudent(@Param('id') id: string): Promise<void> {
+    return this.studentService.removeStudent(id);
+  }
+
+  @Post('/')
+  createStudent(@Body() newStudent: Student): Promise<CreateStudentResponse> {
     return this.studentService.createStudent(newStudent);
   }
 
-  @Get('/list-all')
-  getAll() {
-    return this.studentService.listAllStudents();
-  }
-
-  @Get('/get-one/:id')
-  getOneStudent(@Param('id') id: string) {
-    return this.studentService.getStudentById(id);
-  }
-
-  @Patch('/update/:id')
-  updateStudent(@Param('id') id: string) {
-    return this.studentService.updateStudent(id);
-  }
-
-  @Delete('/delete/:id')
-  deleteStudent(@Param('id') id: string) {
-    return this.studentService.removeStudent(id);
+  @Put('/:id')
+  updateStudent(
+    @Param('id') id: string,
+    @Body() updatedStudent: Student,
+  ): Promise<UpdateStudentResponse> {
+    return this.studentService.updateStudent(id, updatedStudent);
   }
 
   @Post('/import')

@@ -1,26 +1,44 @@
 import { Injectable } from '@nestjs/common';
-import { dummyCSV, StudentDto } from './dto/student.dto';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import * as Papa from 'papaparse';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Student } from './student.entity';
+import { Repository } from 'typeorm';
+import {
+  CreateStudentResponse,
+  GetListOfStudentsResponse,
+  UpdateStudentResponse,
+} from '../interfaces/student';
+import { dummyCSV, StudentDto } from './dto/student.dto';
+import * as Papa from 'papaparse';
 
 @Injectable()
 export class StudentService {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(Student)
+    private studentRepository: Repository<Student>,
+  ) {}
 
-  async listAllStudents(): Promise<void> {}
-
-  async getStudentById(id: string) {
-    // await NazwaZentity.getOne(id)
+  async getListOfStudents(): Promise<GetListOfStudentsResponse> {
+    return await this.studentRepository.find();
   }
 
-  async updateStudent(id: string) {}
+  async getOneStudent(id: string): Promise<Student> {
+    return await this.studentRepository.findOneByOrFail({ id });
+  }
 
-  async createStudent(newStudent: StudentDto) {}
+  async removeStudent(id: string): Promise<void> {
+    await this.studentRepository.delete(id);
+  }
 
-  async removeStudent(id: string) {
-    // await NazwaZentity.delete(id)
+  async createStudent(newStudent: Student): Promise<CreateStudentResponse> {
+    return await this.studentRepository.save(newStudent);
+  }
+
+  async updateStudent(
+    id: string,
+    updatedStudent: Student,
+  ): Promise<UpdateStudentResponse> {
+    await this.studentRepository.update(id, updatedStudent);
+    return this.getOneStudent(id);
   }
 
   async importStudentsCsv(csvFile: string) {
@@ -54,19 +72,19 @@ export class StudentService {
       // compulsory data to insert into Student table
       studentData.firstName = '';
       studentData.lastName = '';
-      studentData.githubUsername = studentData.email; // @TODO Unique index required unique value
+      studentData.githubUsername = '';
       studentData.projectUrls = [];
 
-      const student = await this.dataSource
-        .createQueryBuilder(Student, 'S')
+      const student = await this.studentRepository
+        .createQueryBuilder('S')
         .select(['S.id', 'S.email'])
         .where('S.email = :email', { email: studentData.email })
         .getOne();
 
       let studentId: string;
       if (!student) {
-        const newStudent = await this.dataSource
-          .createQueryBuilder(Student, 'S')
+        const newStudent = await this.studentRepository
+          .createQueryBuilder('S')
           .insert()
           .values(studentData)
           .execute();
