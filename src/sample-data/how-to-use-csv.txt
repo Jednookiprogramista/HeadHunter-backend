@@ -1,0 +1,7 @@
+Podczas developmentu:
+1. Otwórz Insomnie lub inny program do wysyłania zapytań HTTP
+2. Wybierz Multipart Form (wysyłka plików) i dodaj 1 plik z nazwą pola csvFile
+3. Na adres http://localhost:3001/student/import wyślij zapytanie POST
+4. Do bazy danych, tabeli stunts powinny dodać się rekordy w liczbie: 5
+
+// Jeśli dane pliku csv zostaną zmienione - nastąpi ich update w bazie danych

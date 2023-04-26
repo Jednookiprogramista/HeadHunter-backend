@@ -7,6 +7,8 @@ import {
   Param,
   Post,
   Put,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
 import { StudentService } from './student.service';
 import { Student } from './student.entity';
@@ -16,6 +18,10 @@ import {
   GetOneStudentResponse,
   UpdateStudentResponse,
 } from '../interfaces/student';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import * as path from 'path';
+import { storageDir } from '../utils/storage-csv';
+import { MulterDiskUploadedFiles } from '../interfaces/multer-files';
 
 @Controller('student')
 export class StudentController {
@@ -50,7 +56,22 @@ export class StudentController {
   }
 
   @Post('/import')
-  importStudentsCsv(@Body() csvFile: string) {
-    return this.studentService.importStudentsCsv(csvFile);
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        {
+          name: 'csvFile',
+          maxCount: 1,
+        },
+      ],
+      {
+        dest: path.join(storageDir(), 'import-file'),
+      },
+    ),
+  )
+  importStudentsCsv(
+    @UploadedFiles() file: MulterDiskUploadedFiles,
+  ): Promise<{ success: true }> {
+    return this.studentService.importStudentsCsv(file);
   }
 }
