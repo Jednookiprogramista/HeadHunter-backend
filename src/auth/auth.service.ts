@@ -7,6 +7,7 @@ import {sign} from 'jsonwebtoken';
 import {hashPwd} from "../utils/hashPwd";
 import {Response} from "express";
 import {ResetDto} from "./dto/reset.dto";
+import {LoginResponse, SignUpResponse, ResetPasswordResponse} from "../../types";
 
 
 @Injectable()
@@ -41,62 +42,80 @@ export class AuthService {
         return token;
     }
 
-    async signUp(authDto: AuthDto, res: Response): Promise<any> {
+    async signUp(authDto: AuthDto): Promise<SignUpResponse> {
         const user = new User();
         user.email = authDto.email;
         user.passwordHash = hashPwd(authDto.password);
         await user.save();
-        const { email, id } = user;
-        return res
-            .status(202)
-            .json({id, email});
+        return {
+            message: 'Poprawna rejestracja',
+            statusCode: 202,
+            user,
+        };
     }
 
-    async signIn(authDto: AuthDto, res: Response) {
+    async signIn(authDto: AuthDto, res: Response): Promise<LoginResponse> {
         try {
             const user = await User.findOneBy({
                 email: authDto.email,
                 passwordHash: hashPwd(authDto.password),
             });
             if (!user) {
-                return res.status(404).end();
+                res.status(404).end();
+                return {
+                    message: 'Niepoprawne dane',
+                    statusCode: 404,
+                };
             }
             const token = await this.createToken(await this.generateToken(user));
-            const {id, accessToken} = user;
-            return res
+            res
                 .cookie('jwt', token.accessToken, {
                     secure: false, //tu ustawiamy true jeśli jest https (czyli na produkcji)
                     domain: 'localhost', //tu domenę
                     httpOnly: true,
                     sameSite: 'lax',
                 })
-                .status(200)
-                .json({id, accessToken});
+                .status(200);
+            return {
+                message: 'Poprawne dane',
+                statusCode: 200,
+                user,
+            };
         } catch (e) {
-            return res
+            res
                 .status(404)
-                .json({message: e.message})
                 .end();
+            return {
+                message: e.message,
+                statusCode: 404,
+            }
         }
     }
 
-    async resetPassword(resetDto: ResetDto, res: Response) {
+    async resetPassword(resetDto: ResetDto, res: Response): Promise<ResetPasswordResponse> {
         try {
             const user = await User.findOneBy({
                 accessToken: resetDto.token,
             });
             if (user === null) {
-                return res.status(404).end();
+                res.status(404).end();
+                close();
             }
             user.passwordHash = hashPwd(resetDto.password);
             await user.save();
-            const { email, id } = user;
-            return { id, email };
-        }catch (e) {
-            return res
+            return {
+                message: 'Poprawna zmiana hasła',
+                statusCode: 202,
+                user: user,
+            };
+        } catch (e) {
+            res
                 .status(404)
-                .json({message: e.message})
                 .end();
+            return {
+                message: e.message,
+                statusCode: 404,
+            }
         }
     }
 

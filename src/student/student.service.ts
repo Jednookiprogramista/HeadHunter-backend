@@ -45,7 +45,7 @@ export class StudentService {
 
   async updateStudent(
     id: string,
-    updatedStudent: Student,
+    updatedStudent: UpdateStudentResponse,
   ): Promise<UpdateStudentResponse> {
     await this.studentRepository.update(id, updatedStudent);
     return this.getOneStudent(id);
