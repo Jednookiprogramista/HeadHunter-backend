@@ -3,7 +3,6 @@ import { AuthService } from "./auth.service";
 import { AuthDto } from "./dto/auth.dto";
 import {Response} from "express";
 import {ResetDto} from "./dto/reset.dto";
-import {LoginResponse, ResetPasswordResponse, SignUpResponse} from "../../types";
 
 @Controller("/auth")
 export class AuthController {
@@ -11,19 +10,21 @@ export class AuthController {
   }
 
   @Post("/signup")
-  async signup(@Body() dto: AuthDto): Promise<SignUpResponse>{
-    return this.authService.signUp(dto);
+  async signup(@Body() dto: AuthDto,
+               @Res() res: Response) {
+    return this.authService.signUp(dto, res);
   }
 
   @Post("/signin")
   async signin(@Body() dto: AuthDto,
-               @Res() res: Response): Promise<LoginResponse> {
+               @Res() res: Response) {
     return this.authService.signIn(dto, res);
   }
 
   @Post("/recover")
   async recover(@Body() dto: ResetDto,
-                @Res() res: Response): Promise<ResetPasswordResponse> {
+                @Res() res: Response) {
     return this.authService.resetPassword(dto, res);
   }
 }
+
