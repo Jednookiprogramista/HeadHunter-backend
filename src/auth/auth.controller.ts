@@ -1,30 +1,25 @@
-import {Body, Controller, Get, Post, Res} from "@nestjs/common";
-import { AuthService } from "./auth.service";
-import { AuthDto } from "./dto/auth.dto";
-import {Response} from "express";
-import {ResetDto} from "./dto/reset.dto";
+import { Body, Controller, Get, Post, Res } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { AuthDto } from './dto/auth.dto';
+import { Response } from 'express';
+import { ResetDto } from './dto/reset.dto';
 
-@Controller("/auth")
+@Controller('/auth')
 export class AuthController {
-  constructor(private authService: AuthService) {
-  }
+  constructor(private authService: AuthService) {}
 
-  @Post("/signup")
-  async signup(@Body() dto: AuthDto,
-               @Res() res: Response) {
+  @Post('/signup')
+  async signup(@Body() dto: AuthDto, @Res() res: Response) {
     return this.authService.signUp(dto, res);
   }
 
-  @Post("/signin")
-  async signin(@Body() dto: AuthDto,
-               @Res() res: Response) {
+  @Post('/signin')
+  async signin(@Body() dto: AuthDto, @Res() res: Response) {
     return this.authService.signIn(dto, res);
   }
 
-  @Post("/recover")
-  async recover(@Body() dto: ResetDto,
-                @Res() res: Response) {
+  @Post('/recover')
+  async recover(@Body() dto: ResetDto, @Res() res: Response) {
     return this.authService.resetPassword(dto, res);
   }
 }
-

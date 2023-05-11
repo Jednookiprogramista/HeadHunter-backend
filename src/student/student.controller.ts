@@ -1,61 +1,50 @@
 import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    Inject,
-    Param,
-    Post,
-    Put,
-    UploadedFiles,
-    UseInterceptors,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  Post,
+  Put,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
-import {StudentService} from './student.service';
-import {Student} from './student.entity';
-import {
-    CreateStudentResponse,
-    GetListOfStudentsResponse,
-    UpdateStudentResponse,
-} from '../interfaces/student';
-import {FileFieldsInterceptor} from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import * as path from 'path';
-
-import {storageDir} from '../utils/storage-csv';
-import {MulterDiskUploadedFiles} from '../interfaces/multer-files';
-import {GetOneStudentResponse} from "../../types";
+import {
+  CreateStudentResponse,
+  UpdateStudentResponse,
+} from '../interfaces/student';
+import { Student } from './student.entity';
+import { StudentService } from './student.service';
+import { AvailableStudent, GetOneStudentResponse } from '../../types';
 import { Criteria } from '../interfaces/criteria';
+import { MulterDiskUploadedFiles } from '../interfaces/multer-files';
+import { storageDir } from '../utils/storage-csv';
 
 @Controller('student')
 export class StudentController {
-    constructor(@Inject(StudentService) private studentService: StudentService) {
-    }
+  constructor(@Inject(StudentService) private studentService: StudentService) {}
 
-    @Get('/')
-    getListOfStudents(): Promise<GetListOfStudentsResponse> {
-        return this.studentService.getListOfStudents();
-    }
+  @Get('/available-list')
+  availableStudents(@Body() criteria: Criteria): Promise<AvailableStudent[]> {
+    return this.studentService.getAvailableStudents(criteria);
+  }
 
-    @Get('/:id')
-    getOneStudent(@Param('id') id: string): Promise<GetOneStudentResponse> {
-        return this.studentService.getOneStudent(id);
-    }
+  @Get('/:id')
+  getOneStudent(@Param('id') id: string): Promise<GetOneStudentResponse> {
+    return this.studentService.getOneStudent(id);
+  }
 
-    @Delete('/:id')
-    removeStudent(@Param('id') id: string): Promise<void> {
-        return this.studentService.removeStudent(id);
-    }
+  @Delete('/:id')
+  removeStudent(@Param('id') id: string): Promise<void> {
+    return this.studentService.removeStudent(id);
+  }
 
-    @Post('/')
-    createStudent(@Body() newStudent: Student): Promise<CreateStudentResponse> {
-        return this.studentService.createStudent(newStudent);
-    }
-
-
-  @Post('/filter')
-  filterStudents(
-    @Body() criteria: Criteria,
-  ): Promise<GetListOfStudentsResponse> {
-    return this.studentService.getListOfStudentsFiltered(criteria);
+  @Post('/')
+  createStudent(@Body() newStudent: Student): Promise<CreateStudentResponse> {
+    return this.studentService.createStudent(newStudent);
   }
 
   @Put('/:id')
@@ -66,23 +55,23 @@ export class StudentController {
     return this.studentService.updateStudent(id, updatedStudent);
   }
 
-    @Post('/import')
-    @UseInterceptors(
-        FileFieldsInterceptor(
-            [
-                {
-                    name: 'csvFile',
-                    maxCount: 1,
-                },
-            ],
-            {
-                dest: path.join(storageDir(), 'import-file'),
-            },
-        ),
-    )
-    importStudentsCsv(
-        @UploadedFiles() file: MulterDiskUploadedFiles,
-    ): Promise<{ success: true }> {
-        return this.studentService.importStudentsCsv(file);
-    }
+  @Post('/import')
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        {
+          name: 'csvFile',
+          maxCount: 1,
+        },
+      ],
+      {
+        dest: path.join(storageDir(), 'import-file'),
+      },
+    ),
+  )
+  importStudentsCsv(
+    @UploadedFiles() file: MulterDiskUploadedFiles,
+  ): Promise<{ success: true }> {
+    return this.studentService.importStudentsCsv(file);
+  }
 }

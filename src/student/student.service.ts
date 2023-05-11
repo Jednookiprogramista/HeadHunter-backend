@@ -4,7 +4,7 @@ import {
   NotAcceptableException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Student } from './student.entity';
+import { Student as StudentEntity } from './student.entity';
 import { Repository } from 'typeorm';
 import {
   CreateStudentResponse,
@@ -20,12 +20,13 @@ import { storageDir } from '../utils/storage-csv';
 import { readFile } from 'fs/promises';
 import { filterGithubUrls } from '../utils/filter-github-urls';
 import { Criteria } from '../interfaces/criteria';
+import { AvailableStudent, Student } from '../../types';
 
 @Injectable()
 export class StudentService {
   constructor(
-    @InjectRepository(Student)
-    private studentRepository: Repository<Student>,
+    @InjectRepository(StudentEntity)
+    private studentRepository: Repository<StudentEntity>,
   ) {}
 
   async getListOfStudents(): Promise<GetListOfStudentsResponse> {
@@ -33,87 +34,88 @@ export class StudentService {
   }
 
   async getListOfStudentsFiltered(
-    criteria: Criteria,
-  ): Promise<GetListOfStudentsResponse> {
+    availableStudents: boolean,
+    criteria?: Criteria,
+  ): Promise<Student[]> {
     const queryBuilder = this.studentRepository.createQueryBuilder('student');
-    const studentCriteria = criteria.values;
 
-    if (studentCriteria.courseEngagement) {
+    queryBuilder.where(
+      availableStudents ? 'student.hrId is null' : 'student.hrId is not null',
+    );
+
+    if (criteria?.courseEngagement) {
       queryBuilder.andWhere('student.courseEngagement >= :courseEngagement', {
-        courseEngagement: studentCriteria.courseEngagement,
+        courseEngagement: criteria.courseEngagement,
       });
     }
 
-    if (studentCriteria.courseCompletion) {
+    if (criteria?.courseCompletion) {
       queryBuilder.andWhere('student.courseCompletion >= :courseCompletion', {
-        courseCompletion: studentCriteria.courseCompletion,
+        courseCompletion: criteria.courseCompletion,
       });
     }
 
-    if (studentCriteria.projectDegree) {
+    if (criteria?.projectDegree) {
       queryBuilder.andWhere('student.projectDegree >= :projectDegree', {
-        projectDegree: studentCriteria.projectDegree,
+        projectDegree: criteria.projectDegree,
       });
     }
 
-    if (studentCriteria.teamProjectDegree) {
+    if (criteria?.teamProjectDegree) {
       queryBuilder.andWhere('student.teamProjectDegree >= :teamProjectDegree', {
-        teamProjectDegree: studentCriteria.teamProjectDegree,
+        teamProjectDegree: criteria.teamProjectDegree,
       });
     }
 
-    if (
-      studentCriteria.expectedTypeWork &&
-      studentCriteria.expectedTypeWork.length > 0
-    ) {
+    if (criteria?.expectedTypeWork && criteria?.expectedTypeWork.length > 0) {
       queryBuilder.andWhere(
         'student.expectedTypeWork IN (:...expectedTypeWork)',
         {
-          expectedTypeWork: studentCriteria.expectedTypeWork,
+          expectedTypeWork: criteria.expectedTypeWork,
         },
       );
     }
 
     if (
-      studentCriteria.expectedContractType &&
-      studentCriteria.expectedContractType.length > 0
+      criteria?.expectedContractType &&
+      criteria?.expectedContractType.length > 0
     ) {
       queryBuilder.andWhere(
         'student.expectedContractType IN (:...expectedContractType)',
-        { expectedContractType: studentCriteria.expectedContractType },
+        { expectedContractType: criteria.expectedContractType },
       );
     }
 
-    if (studentCriteria.expectedSalary) {
-      if (studentCriteria.expectedSalary.min) {
+    if (criteria?.expectedSalary) {
+      if (criteria?.expectedSalary.min) {
         queryBuilder.andWhere('student.expectedSalary >= :minSalary', {
-          minSalary: studentCriteria.expectedSalary.min,
+          minSalary: criteria.expectedSalary.min,
         });
       }
 
-      if (studentCriteria.expectedSalary.max) {
+      if (criteria?.expectedSalary.max) {
         queryBuilder.andWhere('student.expectedSalary <= :maxSalary', {
-          maxSalary: studentCriteria.expectedSalary.max,
+          maxSalary: criteria.expectedSalary.max,
         });
       }
     }
 
-    if (studentCriteria.canTakeApprenticeship !== undefined) {
-      studentCriteria.canTakeApprenticeship =
-        studentCriteria.canTakeApprenticeship === 'true';
+    if (criteria?.canTakeApprenticeship !== undefined) {
+      criteria.canTakeApprenticeship =
+        criteria.canTakeApprenticeship === 'true';
       queryBuilder.andWhere(
         'student.canTakeApprenticeship = :canTakeApprenticeship',
         {
-          canTakeApprenticeship: studentCriteria.canTakeApprenticeship,
+          canTakeApprenticeship: criteria.canTakeApprenticeship,
         },
       );
     }
 
-    if (studentCriteria.monthsOfCommercialExp) {
+    if (criteria?.monthsOfCommercialExp) {
       queryBuilder.andWhere(
         'student.monthsOfCommercialExp >= :monthsOfCommercialExp',
         {
-          monthsOfCommercialExp: studentCriteria.monthsOfCommercialExp,
+          monthsOfCommercialExp: criteria.monthsOfCommercialExp,
         },
       );
     }
@@ -121,7 +123,45 @@ export class StudentService {
     return await queryBuilder.getMany();
   }
 
-  async getOneStudent(id: string): Promise<Student> {
+  async getAvailableStudents(criteria: Criteria): Promise<AvailableStudent[]> {
+    const availableStudents = await this.getListOfStudentsFiltered(
+      true,
+      criteria,
+    );
+
+    return availableStudents.map<AvailableStudent>(
+      ({
+        id,
+        firstName,
+        lastName,
+        courseCompletion,
+        courseEngagement,
+        projectDegree,
+        teamProjectDegree,
+        expectedTypeWork,
+        targetWorkCity,
+        expectedContractType,
+        expectedSalary,
+        canTakeApprenticeship,
+        monthsOfCommercialExp,
+      }) => ({
+        id,
+        name: `${firstName} ${lastName[0]}.`,
+        courseCompletion,
+        courseEngagement,
+        projectDegree,
+        teamProjectDegree,
+        expectedTypeWork,
+        targetWorkCity,
+        expectedContractType,
+        expectedSalary,
+        canTakeApprenticeship,
+        monthsOfCommercialExp,
+      }),
+    );
+  }
+
+  async getOneStudent(id: string): Promise<StudentEntity> {
     return await this.studentRepository.findOneByOrFail({ id });
   }
 
@@ -129,7 +169,9 @@ export class StudentService {
     await this.studentRepository.delete(id);
   }
 
-  async createStudent(newStudent: Student): Promise<CreateStudentResponse> {
+  async createStudent(
+    newStudent: StudentEntity,
+  ): Promise<CreateStudentResponse> {
     return await this.studentRepository.save(newStudent);
   }
 
@@ -192,7 +234,7 @@ export class StudentService {
       studentData.teamProjectDegree = studentCsvData.teamProjectDegree;
       studentData.bonusProjectUrls = studentCsvData.bonusProjectUrls;
 
-      // compulsory data to insert into Student table
+      // compulsory data to insert into StudentEntity table
       studentData.firstName = '';
       studentData.lastName = '';
       studentData.githubUsername = studentCsvData.email; // Unique index
