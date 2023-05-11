@@ -19,9 +19,11 @@ import {
 } from '../interfaces/student';
 import {FileFieldsInterceptor} from '@nestjs/platform-express';
 import * as path from 'path';
+
 import {storageDir} from '../utils/storage-csv';
 import {MulterDiskUploadedFiles} from '../interfaces/multer-files';
 import {GetOneStudentResponse} from "../../types";
+import { Criteria } from '../interfaces/criteria';
 
 @Controller('student')
 export class StudentController {
@@ -48,13 +50,21 @@ export class StudentController {
         return this.studentService.createStudent(newStudent);
     }
 
-    @Put('/:id')
-    updateStudent(
-        @Param('id') id: string,
-        @Body() updatedStudent: UpdateStudentResponse,
-    ): Promise<UpdateStudentResponse> {
-        return this.studentService.updateStudent(id, updatedStudent);
-    }
+
+  @Post('/filter')
+  filterStudents(
+    @Body() criteria: Criteria,
+  ): Promise<GetListOfStudentsResponse> {
+    return this.studentService.getListOfStudentsFiltered(criteria);
+  }
+
+  @Put('/:id')
+  updateStudent(
+    @Param('id') id: string,
+    @Body() updatedStudent: Student,
+  ): Promise<UpdateStudentResponse> {
+    return this.studentService.updateStudent(id, updatedStudent);
+  }
 
     @Post('/import')
     @UseInterceptors(
