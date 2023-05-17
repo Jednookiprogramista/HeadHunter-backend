@@ -19,9 +19,7 @@ export interface GetOneStudentResponse {
 
 export type Student = StudentEntity;
 
-export interface AvailableStudent {
-  id: string;
-  name: string;
+export type StudentShortDetails = {
   courseCompletion: number;
   courseEngagement: number;
   projectDegree: number;
@@ -32,4 +30,9 @@ export interface AvailableStudent {
   expectedSalary: string;
   canTakeApprenticeship: boolean;
   monthsOfCommercialExp: number;
+};
+
+export interface AvailableStudent extends StudentShortDetails {
+  id: string;
+  name: string;
 }
