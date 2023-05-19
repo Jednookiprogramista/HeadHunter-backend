@@ -2,11 +2,14 @@ import { IsEmail, Max, Min } from 'class-validator';
 import {
   Column,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
 import { Student } from '../student/student.entity';
+import { User } from '../auth/auth.entity';
 
 @Entity()
 @Unique(['email'])
@@ -39,4 +42,8 @@ export class HR {
 
   @OneToMany(() => Student, (student) => student.hr)
   students: Student[];
+
+  @OneToOne(() => User)
+  @JoinColumn()
+  user: User;
 }

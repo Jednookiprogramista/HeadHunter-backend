@@ -1,4 +1,5 @@
 import {
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotAcceptableException,
@@ -21,12 +22,14 @@ import { readFile } from 'fs/promises';
 import { filterGithubUrls } from '../utils/filter-github-urls';
 import { Criteria } from '../interfaces/criteria';
 import { AvailableStudent, Student } from '../../types';
+import { HRService } from '../hr/hr.service';
 
 @Injectable()
 export class StudentService {
   constructor(
     @InjectRepository(StudentEntity)
     private studentRepository: Repository<StudentEntity>,
+    @Inject(HRService) private hrService: HRService,
   ) {}
 
   async getListOfStudents(): Promise<GetListOfStudentsResponse> {
@@ -181,6 +184,15 @@ export class StudentService {
   ): Promise<UpdateStudentResponse> {
     await this.studentRepository.update(id, updatedStudent);
     return this.getOneStudent(id);
+  }
+
+  async reserveStudent(studentId: string, hrId: string): Promise<void> {
+    const hr = await this.hrService.getHRByUserId(hrId);
+    await this.studentRepository.update(studentId, { hr });
+  }
+
+  async clearReservation(studentId: string): Promise<void> {
+    await this.studentRepository.update(studentId, { hr: null });
   }
 
   async handleStudentParsingAndSavingToDatabase(csvFile: string) {

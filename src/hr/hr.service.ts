@@ -16,6 +16,12 @@ export class HRService {
     return await this.HRRepository.findOneByOrFail({ id });
   }
 
+  async getHRByUserId(userId: string): Promise<HR> {
+    return await this.HRRepository.createQueryBuilder('hr')
+      .leftJoinAndSelect('hr.user', 'user', 'userId = :userId', { userId })
+      .getOneOrFail();
+  }
+
   async removeHR(id: string): Promise<void> {
     await this.HRRepository.delete(id);
   }

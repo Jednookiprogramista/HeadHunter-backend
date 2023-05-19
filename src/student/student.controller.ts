@@ -12,16 +12,16 @@ import {
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import * as path from 'path';
+import { AvailableStudent, GetOneStudentResponse } from '../../types';
+import { Criteria } from '../interfaces/criteria';
+import { MulterDiskUploadedFiles } from '../interfaces/multer-files';
 import {
   CreateStudentResponse,
   UpdateStudentResponse,
 } from '../interfaces/student';
+import { storageDir } from '../utils/storage-csv';
 import { Student } from './student.entity';
 import { StudentService } from './student.service';
-import { AvailableStudent, GetOneStudentResponse } from '../../types';
-import { Criteria } from '../interfaces/criteria';
-import { MulterDiskUploadedFiles } from '../interfaces/multer-files';
-import { storageDir } from '../utils/storage-csv';
 
 @Controller('student')
 export class StudentController {
@@ -53,6 +53,19 @@ export class StudentController {
     @Body() updatedStudent: Student,
   ): Promise<UpdateStudentResponse> {
     return this.studentService.updateStudent(id, updatedStudent);
+  }
+
+  @Put('/:id/reserve')
+  reserveStudent(
+    @Param('id') id: string,
+    @Body('user') user: string,
+  ): Promise<void> {
+    return this.studentService.reserveStudent(id, user);
+  }
+
+  @Put('/:id/clear-reservation')
+  clearReservation(@Param('id') id: string): Promise<void> {
+    return this.studentService.clearReservation(id);
   }
 
   @Post('/import')
