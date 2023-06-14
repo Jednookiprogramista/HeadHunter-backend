@@ -32,19 +32,23 @@ also screenshots of the pages:
 <br>
 Login page
 
-![img.png](img.png)
+![img1](https://github.com/Jednookiprogramista/HeadHunter-backend/assets/98560465/3e59c7fb-c3c2-402c-b4d9-ff895a3105af)
+
 <br>
 <br>
 
 Main page
 
-![img_1.png](img_1.png)
+![img_2](https://github.com/Jednookiprogramista/HeadHunter-backend/assets/98560465/4ec6e831-0b51-4d68-bbab-106c3b3918a3)
 
-![img_2.png](img_2.png)
+
+![img_3(1)](https://github.com/Jednookiprogramista/HeadHunter-backend/assets/98560465/615570ce-b68d-4ecd-b896-b53f401dde1a)
+
 
 Filter button function
 
-![img_3.png](img_3.png)
+![img_4](https://github.com/Jednookiprogramista/HeadHunter-backend/assets/98560465/217577e7-be87-441c-816a-db2e63807752)
+
 
 Candidate-CV page
 
@@ -53,7 +57,8 @@ Candidate-CV page
 
 User-space
 
-![img_4.png](img_4.png)
+![img_5 (1)](https://github.com/Jednookiprogramista/HeadHunter-backend/assets/98560465/661e1dea-1504-4f40-9e64-04dd721133a9)
+
 
 
 ## Tech Stack 👨‍🏫
